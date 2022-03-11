@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="images/css/style.css">
+    <link rel="stylesheet" href="sounds/classic_hurt.mp3">
+    <title>Document</title>
+</head>
+<body>
+
+    <progress id="playerHealth" style="margin-left: 10px; margin-top: 50px" value="100" max="100"></progress>
+    
+    <script src="simple.js">
+    { 
+      var player = {x: 10, y: 520} //Koordinater för min spelare
+      var playerSpeed = 17; //Variabel med fart för min spelare
+      var playerScore = 0; //Variabel med poäng för min spelare
+
+      var zombie = {x: 900, y: 100} //Koordinater för zombie
+      var zombieSpeed = 15; //Variabel med fart för zombie
+      var zombieScore = 0; //Variabel med poäng för zombie
+
+      let playerHealth = document.getElementById("playerHealth") //En variabel som innehåller liv för spelaren
+
+      var time = 0;
+      updatesPerSecond = 60;
+      
+      var bullets = [];
+      var bulletCount = 20;
+    
+      preloadSound("sounds/classic_hurt.mp3"); //Laddar in ett ljud
+      preloadSound("sounds/minecraft-grass-walking-sound-effect.mp3"); //Laddar in ett ljud
+      preloadSound("sounds/BoxCat-Games-Battle-Boss.mp3"); //Laddar in ett ljud
+
+      var obstacleColor = "black"; //En variabel för färgen på hindrena
+      var obstacleOne =   {x: 150, y: 150} //Koordinater för rektangeln längst upp till vänster
+      var obstacleTwo =   {x: 650, y: 0}   //Koordinater för rektangeln höger om den längst upp till vänster
+      var obstacleThree = {x: 200, y: 500} //Koordinater för rektangeln längst ner till vänster
+      var obstacleFour =  {x: 900, y: 400} //Koordinater för rektangeln som är i mitten och går lodrätt
+      var obstacleFive =  {x: 1100, y: 400}//Koordinater för rektangeln som är näst längst till höger och går vågrätt
+      var obstacleSix =   {x: 1300, y: 220}//Koordinater för rektangeln som är längst till höger och går lodrätt
+
+      function update(updatesPerSecond)
+      {
+            clearScreen();
+
+            rectangle(obstacleOne.x, obstacleOne.y, 300, 20, obstacleColor);     //Lägger in hinder
+            rectangle(obstacleTwo.x, obstacleTwo.y, 20, 170, obstacleColor);     //Lägger in hinder
+            rectangle(obstacleThree.x, obstacleThree.y, 300, 20, obstacleColor); //Lägger in hinder
+            rectangle(obstacleFour.x, obstacleFour.y, 20, 200, obstacleColor);   //Lägger in hinder
+            rectangle(obstacleFive.x, obstacleFive.y, 200, 20, obstacleColor);   //Lägger in hinder
+            rectangle(obstacleSix.x, obstacleSix.y, 20, 200, obstacleColor);     //Lägger in hinder
+
+            picture(player.x, player.y, "images/2dPixelGuy.png") // Lägger in spelaren
+            if(keyboard.w)  {player.y -= playerSpeed; playSound("sounds/minecraft-grass-walking-sound-effect.mp3")} //Fixar kontroller åt spelaren
+            if(keyboard.s)  {player.y += playerSpeed;} //Fixar kontroller åt spelaren
+            if(keyboard.a)  {player.x -= playerSpeed;} //Fixar kontroller åt spelaren
+            if(keyboard.d)  {player.x += playerSpeed;} //Fixar kontroller åt spelaren
+
+            if(player.y < 0)                  {player.y = 0;}                 //Spelaren kan inte gå utanför skärmen
+            if(player.y >= totalHeight - 100) {player.y = totalHeight - 100;} //Spelaren kan inte gå utanför skärmen
+            if(player.x < 0)                  {player.x = 0;}                 //Spelaren kan inte gå utanför skärmen
+            if(player.x >= totalWidth - 90)   {player.x = totalWidth - 90;}   //Spelaren kan inte gå utanför skärmen
+
+            picture(zombie.x, zombie.y, "images/zombie2.png");  //Lägger in Zombien
+            if(keyboard.up)    {zombie.y -= zombieSpeed;}  //Fixar kontroller åt zombien
+            if(keyboard.down)  {zombie.y += zombieSpeed;}  //Fixar kontroller åt zombien
+            if(keyboard.left)  {zombie.x -= zombieSpeed;}  //Fixar kontroller åt zombien
+            if(keyboard.right) {zombie.x += zombieSpeed;}  //Fixar kontroller åt zombien
+
+            if(zombie.y < 0)                  {zombie.y = 0;}                 //Zombien kan inte gå utanför skärmen
+            if(zombie.y >= totalHeight - 130) {zombie.y = totalHeight - 130;} //Zombien kan inte gå utanför skärmen
+            if(zombie.x < 0)                  {zombie.x = 0;}                 //Zombien kan inte gå utanför skärmen
+            if(zombie.x >= totalWidth - 110)  {zombie.x = totalWidth - 110;}  //Zombien kan inte gå utanför skärmen
+
+            if(keyboard.space && bulletCount > 0){
+                bullets.push({x: player.x, y: player.y});
+                bulletCount -= 1;
+            }
+            for(var i = 0; i < bullets.length; i++){
+                var bullet = bullets[i];
+                circle(bullet.x, bullet.y, 2, "black");
+                if(distance(bullet, zombie) < 40){
+                    player.x = 10;
+                player.y = 520;
+                zombie.x = 900;
+                zombie.y = 100;
+                }
+
+                if(zombie.x > bullet.x){
+                    bullet.x += 10;
+                }
+                bullet.x += 5;
+            }
+            
+            
+            //Player Collision Detection        
+            if(player.y > obstacleOne.y - 100 && player.y < obstacleOne.y && player.x > obstacleOne.x - 85 && player.x < obstacleOne.x + 295) 
+            {
+                player.y = obstacleOne.y - 100; //Gör så man inte kan gå igenom "obstacleOne" ovanifrån med spelaren
+            } 
+            if(player.y < obstacleOne.y + 20 && player.y > obstacleOne.y - 100 && player.x > obstacleOne.x - 85 && player.x < obstacleOne.x + 295)
+            {
+                player.y = obstacleOne.y + 20; //Gör så man inte kan gå igenom "obstacleOne" underifrån med spelaren
+            }
+
+            if(player.x > obstacleTwo.x - 85 && player.x < obstacleTwo.x && player.y > obstacleTwo.y - 90 && player.y <obstacleTwo.y + 170){
+                player.x = obstacleTwo.x - 85; //Gör så man inte kan gå igenom "obstacleFive" från vänster med spelaren
+            }
+            if(player.x <= obstacleTwo.x + 20 && player.x > obstacleTwo.x - 85 && player.y > obstacleTwo.y - 90 && player.y <obstacleTwo.y + 170){
+                player.x = obstacleTwo.x + 20; //Gör så man inte kan gå igenom "ObstacleTwo" från höger med spelaren
+            }
+
+            if(player.y > obstacleThree.y - 100 && player.y < obstacleThree.y && player.x > obstacleThree.x - 90 && player.x < obstacleThree.x + 300) 
+            {
+                player.y = obstacleThree.y - 100; //Gör så man inte kan gå igenom "obstacleThree" ovanifrån med spelaren
+            }                 
+            if(player.y < obstacleThree.y + 20 && player.y > obstacleThree.y - 100 && player.x > obstacleThree.x - 90 && player.x < obstacleThree.x + 300)
+            {
+                player.y = obstacleThree.y + 20; //Gör så man inte kan gå igenom "obstacleThree" underifrån med spelaren
+            }
+
+            if(player.x > obstacleFour.x - 85 && player.x < obstacleFour.x && player.y > obstacleFour.y - 90 && player.y <obstacleFour.y + 170){
+                player.x = obstacleFour.x - 85; //Gör så man inte kan gå igenom "obstacleFive" från vänster med spelaren
+            }
+            if(player.x <= obstacleFour.x + 20 && player.x > obstacleFour.x - 85 && player.y > obstacleFour.y - 90 && player.y <obstacleFour.y + 170){
+                player.x = obstacleFour.x + 20; //Gör så man inte kan gå igenom "ObstacleTwo" från höger med spelaren
+            }
+
+            if(player.y > obstacleFive.y - 100 && player.y < obstacleFive.y && player.x > obstacleFive.x - 90 && player.x < obstacleFive.x + 200) 
+            {
+                player.y = obstacleFive.y - 100; //Gör så man inte kan gå igenom "obstacleFive" ovanifrån med spelaren
+            }                 
+            if(player.y < obstacleFive.y + 20 && player.y > obstacleFive.y - 100 && player.x > obstacleFive.x - 90 && player.x < obstacleFive.x + 200)
+            {
+                player.y = obstacleFive.y + 20; //Gör så man inte kan gå igenom "obstacleFive" underifrån med spelaren
+            }
+
+            if(player.x > obstacleSix.x - 85 && player.x < obstacleSix.x && player.y > obstacleSix.y - 90 && player.y <obstacleSix.y + 170){
+                player.x = obstacleSix.x - 85; //Gör så man inte kan gå igenom "obstacleFive" från vänster med spelaren
+            }
+            if(player.x <= obstacleSix.x + 20 && player.x > obstacleSix.x - 85 && player.y > obstacleSix.y - 90 && player.y <obstacleSix.y + 170){
+                player.x = obstacleSix.x + 20; //Gör så man inte kan gå igenom "ObstacleTwo" från höger med spelaren
+            }
+            
+            //Zombie Collision Detection
+            if(zombie.y > obstacleOne.y - 125 && zombie.y < obstacleOne.y && zombie.x > obstacleOne.x - 85 && zombie.x < obstacleOne.x + 295) 
+            {
+                zombie.y = obstacleOne.y - 125; //Gör så man inte kan gå igenom "obstacleOne" ovanifrån med zombien
+            } 
+            if(zombie.y < obstacleOne.y + 20 && zombie.y > obstacleOne.y - 100 && zombie.x > obstacleOne.x - 85 && zombie.x < obstacleOne.x + 295)
+            {
+                zombie.y = obstacleOne.y + 20; //Gör så man inte kan gå igenom "obstacleOne" underifrån med zombien
+            }
+
+            if(zombie.x > obstacleTwo.x - 105 && zombie.x < obstacleTwo.x && zombie.y > obstacleTwo.y - 90 && zombie.y <obstacleTwo.y + 170){
+                zombie.x = obstacleTwo.x - 105; //Gör så man inte kan gå igenom "obstacleFive" från vänster med spelaren
+            }
+            if(zombie.x <= obstacleTwo.x + 20 && zombie.x > obstacleTwo.x - 85 && zombie.y > obstacleTwo.y - 90 && zombie.y <obstacleTwo.y + 170){
+                zombie.x = obstacleTwo.x + 20; //Gör så man inte kan gå igenom "ObstacleTwo" från höger med spelaren
+            }
+
+            if(zombie.y > obstacleThree.y - 125 && zombie.y < obstacleThree.y && zombie.x > obstacleThree.x - 90 && zombie.x < obstacleThree.x + 300) 
+            {
+                zombie.y = obstacleThree.y - 125; //Gör så man inte kan gå igenom "obstacleThree" ovanifrån med spelaren
+            }                 
+            if(zombie.y < obstacleThree.y + 20 && zombie.y > obstacleThree.y - 100 && zombie.x > obstacleThree.x - 90 && zombie.x < obstacleThree.x + 300)
+            {
+                zombie.y = obstacleThree.y + 20; //Gör så man inte kan gå igenom "obstacleThree" underifrån med spelaren
+            }
+
+            if(zombie.x > obstacleFour.x - 100 && zombie.x < obstacleFour.x && zombie.y > obstacleFour.y - 130 && zombie.y <obstacleFour.y + 185){
+                zombie.x = obstacleFour.x - 100; //Gör så man inte kan gå igenom "obstacleFive" från vänster med spelaren
+            }
+            if(zombie.x <= obstacleFour.x + 20 && zombie.x > obstacleFour.x - 85 && zombie.y > obstacleFour.y - 130 && zombie.y <obstacleFour.y + 185){
+                zombie.x = obstacleFour.x + 20; //Gör så man inte kan gå igenom "ObstacleTwo" från höger med spelaren
+            }
+
+            if(zombie.y > obstacleFive.y - 125 && zombie.y < obstacleFive.y && zombie.x > obstacleFive.x - 90 && zombie.x < obstacleFive.x + 210) 
+            {
+                zombie.y = obstacleFive.y - 125; //Gör så man inte kan gå igenom "obstacleFive" ovanifrån med spelaren
+            }                 
+            if(zombie.y < obstacleFive.y + 20 && zombie.y > obstacleFive.y - 100 && zombie.x > obstacleFive.x - 90 && zombie.x < obstacleFive.x + 210)
+            {
+                zombie.y = obstacleFive.y + 20; //Gör så man inte kan gå igenom "obstacleFive" underifrån med spelaren
+            }
+
+            if(zombie.x > obstacleSix.x - 100 && zombie.x < obstacleSix.x && zombie.y > obstacleSix.y - 140 && zombie.y <obstacleSix.y + 170){
+                zombie.x = obstacleSix.x - 100; //Gör så man inte kan gå igenom "obstacleFive" från vänster med spelaren
+            }
+            if(zombie.x <= obstacleSix.x + 20 && zombie.x > obstacleSix.x - 85 && zombie.y > obstacleSix.y - 140 && zombie.y <obstacleSix.y + 170){
+                zombie.x = obstacleSix.x + 20; //Gör så man inte kan gå igenom "ObstacleTwo" från höger med spelaren
+            }
+
+            if(distance(player, zombie) < 100){
+                zombieScore += 1; //Ifall zombien tar spelaren får zombien ett poäng
+                bulletCount = 20;
+                //Resettar positionen på spelaren och zombien
+                player.x = 10;
+                player.y = 520;
+                zombie.x = 900;
+                zombie.y = 100;
+                time = 1; //Tiden börjar om
+                playerHealth.value -= 10;
+            }
+            if(time / 35 >= 30){
+                time = 0; //Om tiden blir 30 sekunder så startar den om
+                playerScore += 1; //Om tiden blir 30 sekunder så får spelaren ett poäng
+                bulletCount = 20;
+                player.x = 10;
+                player.y = 520;
+                zombie.x = 900;
+                zombie.y = 100;
+                //Resettar positionen på spelaren och zombien
+            }
+            text(10, 30, 30, "Zombie Score:" + zombieScore, "red"); //En text där det står "Zombie Score:" och sedan variabeln "zombieScore" som innehåller zombiens poäng
+            text(10, 60, 30, "Player Score:" + playerScore, "red"); //En text där det står "Player Score:" och sedan variabeln "playerScore" som innehåller spelarens poäng
+            text(totalWidth / 2 - 20, totalHeight / 2 - 20, 80, ceil(time / 35), "red"); //En text som innehåller hur lång tid det har gått
+            
+            time += 1; //En variabel som ökar med ett varje gång den går igenom update funktionen, använder den för att räkna tid
+        }
+        
+    }
+    </script>
+</body>
+</html>
